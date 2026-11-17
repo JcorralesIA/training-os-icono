@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1722">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Training OS">
+<title>Training OS</title>
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./favicon.png">
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:dark;background:#0c1722;color:#eaf9f5}*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:28px}
+main{max-width:440px;width:100%;border:1px solid #2b5a59;border-radius:22px;background:#142434;padding:24px;text-align:center}
+img{width:86px;border-radius:20px;display:block;margin:auto}h1{font-size:24px;margin:12px 0 8px}p{font-size:14px;line-height:1.55;color:#c5d6df}label{display:block;text-align:left;font-size:13px;color:#c5d6df;margin-top:16px}
+input{font:inherit;color:#fff;width:100%;border-radius:11px;border:1px solid #3b6571;background:#0c1722;padding:12px;margin:7px 0 11px;min-height:46px}
+button,a.button{display:block;width:100%;border:0;border-radius:12px;background:#61dbc0;color:#102b29;text-decoration:none;padding:13px;font-weight:800;font-size:15px;cursor:pointer}
+button.secondary,a.secondary{background:#1d4550;color:#e1fcf4;margin-top:11px}.sub{color:#a8bec8;font-size:12px}.error{color:#ffb9b9}.hide{display:none!important}
+</style></head>
+<body><main><img src="./apple-touch-icon.png" alt="Logotipo Training OS"><h1>Training OS</h1>
+<div id="setup"><p>Configura una sola vez el acceso a tu aplicación privada. Tu dirección no se envía a este sitio: queda después de # en el enlace del dispositivo.</p>
+<label for="url">URL privada de la aplicación (Apps Script, termina en /exec)</label><input id="url" type="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="https://script.google.com/macros/s/.../exec">
+<button id="prepare">Preparar icono</button><p id="error" class="error" aria-live="polite"></p></div>
+<div id="ready" class="hide"><p>Acceso preparado. En Safari pulsa <b>Compartir → Añadir a pantalla de inicio</b>. El icono nuevo será el de Training OS.</p>
+<a id="open" class="button" href="#" rel="noreferrer">Abrir Training OS</a>
+<p class="sub">Comprueba que funciona antes de eliminar el antiguo icono con la T.</p>
+<button id="edit" class="secondary">Cambiar URL</button></div>
+</main><script>
+'use strict';
+const safeUrl=(v)=>{
+ try{let u=new URL(v.trim());if(u.protocol!=='https:'||u.hostname!=='script.google.com'||!/^\/macros\/s\/[A-Za-z0-9_-]+\/exec\/?$/.test(u.pathname)||u.username||u.password) return null;return u.href;}catch(e){return null;}
+};
+const decodeHash=()=>{try{return safeUrl(decodeURIComponent(location.hash.slice(1)));}catch(e){return null;}};
+const saved=decodeHash();
+const showReady=(u)=>{document.getElementById('setup').classList.add('hide');document.getElementById('ready').classList.remove('hide');document.getElementById('open').href=u;};
+if(saved){
+ showReady(saved);
+ // Al abrir un Web Clip ya configurado, redirigir a la app privada.
+ // Durante la instalación (pestaña Safari) se muestra el botón; no hay redirección automática al configurar.
+ if(document.referrer==='' && window.navigator.standalone===true){location.replace(saved);}
+}
+document.getElementById('prepare').addEventListener('click',()=>{
+ const u=safeUrl(document.getElementById('url').value);
+ if(!u){document.getElementById('error').textContent='Introduce la dirección original de Apps Script terminada en /exec.';return;}
+ history.replaceState(null,'',location.pathname+location.search+'#'+encodeURIComponent(u));showReady(u);
+});
+document.getElementById('edit').addEventListener('click',()=>{document.getElementById('ready').classList.add('hide');document.getElementById('setup').classList.remove('hide');document.getElementById('url').value=decodeHash()||'';});
+</script></body></html>
